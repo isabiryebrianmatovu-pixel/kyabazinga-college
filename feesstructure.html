@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyabazinga College – Fees Structure</title>
+
+<style>
+/* ================= GENERAL STYLING ================= */
+body{
+    margin:0;
+    padding:0;
+    font-family:"Times New Roman", serif;
+    background:#ffffff;
+}
+
+header{
+    background:#002366;
+    color:white;
+    text-align:center;
+    padding:25px 10px;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    padding:25px;
+}
+
+/* ================= BACK BUTTON ================= */
+.nav-btn{
+    display:inline-block;
+    margin:15px 0;
+    padding:10px 20px;
+    background:#d40000;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    border-radius:6px;
+}
+.nav-btn:hover{
+    background:#a00000;
+}
+
+/* ================= SECTIONS ================= */
+.section{
+    background:white;
+    padding:20px;
+    margin-bottom:25px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.section h2{
+    color:#002366;
+    margin-bottom:15px;
+    border-bottom:2px solid #ddd;
+    padding-bottom:5px;
+}
+
+/* ================= TABLE ================= */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
+    text-align:left;
+}
+
+th{
+    background:#f2f2f2;
+}
+
+/* ================= LISTS ================= */
+ul{
+    list-style:disc;
+    padding-left:20px;
+}
+
+footer{
+    background:#d40000;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Official School Fees Structure</em></p>
+</header>
+
+<div class="container">
+
+<!-- ================= BACK BUTTON ================= -->
+<a href="visitor.html" class="nav-btn">BACK</a>
+
+<!-- ================= FEES STRUCTURE ================= -->
+<div class="section">
+<h2>School Fees (UGX)</h2>
+
+<table>
+<thead>
+<tr>
+    <th>Class</th>
+    <th>Day School Fees</th>
+    <th>Boarding School Fees</th>
+</tr>
+</thead>
+<tbody id="feesTableBody">
+</tbody>
+</table>
+</div>
+
+<!-- ================= GENERAL REQUIREMENTS ================= -->
+<div class="section">
+<h2>General School Requirements</h2>
+<ul id="generalReqList"></ul>
+</div>
+
+<!-- ================= GIRLS REQUIREMENTS ================= -->
+<div class="section">
+<h2>Requirements for Girls</h2>
+<ul id="girlsReqList"></ul>
+</div>
+
+<!-- ================= BOYS REQUIREMENTS ================= -->
+<div class="section">
+<h2>Requirements for Boys</h2>
+<ul id="boysReqList"></ul>
+</div>
+
+</div>
+
+<footer>
+<p>© 2025 Kyabazinga College — Discipline, Knowledge, Culture</p>
+</footer>
+
+<script>
+/* ================= FORMAT UGX ================= */
+function formatUGX(amount){
+    return "UGX " + Number(amount).toLocaleString("en-UG");
+}
+
+/* ================= LOAD FEES ================= */
+function loadFeesStructure(){
+    const tbody = document.getElementById("feesTableBody");
+    tbody.innerHTML = "";
+
+    const fees = JSON.parse(localStorage.getItem("schoolFees")) || {};
+
+    if(Object.keys(fees).length === 0){
+        tbody.innerHTML = "<tr><td colspan='3'>No fees information available.</td></tr>";
+        return;
+    }
+
+    for(let cls in fees){
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${cls}</td>
+            <td>${formatUGX(fees[cls].day)}</td>
+            <td>${formatUGX(fees[cls].boarding)}</td>
+        `;
+        tbody.appendChild(row);
+    }
+}
+
+/* ================= LOAD REQUIREMENTS ================= */
+function loadRequirements(type, elementId){
+    const list = document.getElementById(elementId);
+    list.innerHTML = "";
+
+    const data = JSON.parse(localStorage.getItem(type + "Requirements")) || [];
+
+    if(data.length === 0){
+        const li = document.createElement("li");
+        li.textContent = "No information provided.";
+        list.appendChild(li);
+        return;
+    }
+
+    data.forEach(item=>{
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+    });
+}
+
+/* ================= INITIAL LOAD ================= */
+loadFeesStructure();
+loadRequirements("general", "generalReqList");
+loadRequirements("girls", "girlsReqList");
+loadRequirements("boys", "boysReqList");
+</script>
+
+</body>
+</html>
