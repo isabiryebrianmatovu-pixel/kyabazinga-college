@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Home</title>
+
+<style>
+body{margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header{background:#d40000;color:white;text-align:center;padding:30px 10px;}
+header img{width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+
+nav.button-nav{
+    background:#a00000;
+    padding:12px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+}
+nav.button-nav a.nav-btn{
+    background:white;
+    color:#a00000;
+    padding:10px 18px;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:17px;
+    border-radius:6px;
+    border:2px solid #a00000;
+    transition:0.3s;
+}
+nav.button-nav a.nav-btn:hover{background:#a00000;color:white;}
+
+.container{width:90%;margin:auto;padding-top:20px;}
+.section{
+    padding:25px;
+    margin-bottom:25px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    background:white;
+}
+.section h2{color:#d40000;}
+.section p{font-size:16px;line-height:1.6;}
+
+/* Alternating layout */
+.flex-section{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:20px;
+}
+.flex-section img{
+    max-width:45%;
+    border-radius:6px;
+}
+.flex-section .text{flex:1;}
+
+.left-img img{order:0;}
+.left-img .text{order:1;}
+.right-img img{order:1;}
+.right-img .text{order:0;}
+
+/* Announcements */
+#announcePhotos{
+    position:relative;
+    height:200px;
+    overflow:hidden;
+    border-radius:6px;
+}
+#announcePhotos img{
+    position:absolute;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition:opacity 1s;
+}
+#announcePhotos img.active{opacity:1;}
+
+/* Trending */
+.horizontal-scroll{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+}
+.horizontal-scroll img{
+    max-width:250px;
+    border-radius:4px;
+    border:1px solid #ccc;
+}
+
+/* Quick Links */
+.quick-links ul{
+    padding-left:20px;
+}
+.quick-links li{
+    margin-bottom:8px;
+}
+.quick-links a{
+    text-decoration:none;
+    color:#002366;
+    font-weight:bold;
+}
+.quick-links a:hover{
+    text-decoration:underline;
+}
+
+footer{
+    background:#002366;
+    color:white;
+    text-align:center;
+    padding:20px;
+    margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img id="schoolBadge" src="badge.png">
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Excellence in Education</em></p>
+</header>
+
+<nav class="button-nav">
+    <a href="administrator.html" class="nav-btn">ADMINISTRATOR</a>
+    <a href="teacher_login.html" class="nav-btn">TEACHER</a>
+    <a href="studentlogin.html" class="nav-btn">STUDENT</a>
+    <a href="visitor.html" class="nav-btn">VISITOR</a>
+</nav>
+
+<div class="container">
+
+<!-- HEAD TEACHER -->
+<div class="section flex-section left-img">
+    <img id="htPhoto">
+    <div class="text">
+        <h2>Head Teacher’s Message</h2>
+        <p id="htMessage"></p>
+    </div>
+</div>
+
+<!-- VISION -->
+<div class="section flex-section right-img">
+    <div class="text">
+        <h2>Vision</h2>
+        <p id="visionText"></p>
+    </div>
+    <img id="visionPhoto">
+</div>
+
+<!-- MISSION -->
+<div class="section flex-section left-img">
+    <img id="missionPhoto">
+    <div class="text">
+        <h2>Mission</h2>
+        <p id="missionText"></p>
+    </div>
+</div>
+
+<!-- VALUES -->
+<div class="section flex-section right-img">
+    <div class="text">
+        <h2>Core Values</h2>
+        <p id="valuesText"></p>
+    </div>
+    <img id="valuesPhoto">
+</div>
+
+<!-- ANNOUNCEMENTS -->
+<div class="section">
+    <h2>Announcements</h2>
+    <div id="announcePhotos"></div>
+    <p id="announcementsText"></p>
+</div>
+
+<!-- TRENDING -->
+<div class="section">
+    <h2>Trending at Campus</h2>
+    <div id="trendPhotos" class="horizontal-scroll"></div>
+    <p id="trendingText"></p>
+</div>
+
+<!-- QUICK LINKS -->
+<div class="section quick-links">
+    <h2>Quick Links</h2>
+    <ul id="quickLinksList"></ul>
+</div>
+
+</div>
+
+<footer>
+    <p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+/* PHOTOS */
+["schoolBadge","htPhoto","visionPhoto","missionPhoto","valuesPhoto"]
+.forEach(id=>{
+    const v = localStorage.getItem(id);
+    if(v) document.getElementById(id).src = v;
+});
+
+/* TEXT */
+["htMessage","visionText","missionText","valuesText","announcementsText","trendingText"]
+.forEach(id=>{
+    const v = localStorage.getItem(id);
+    if(v) document.getElementById(id).textContent = v;
+});
+
+/* MULTI PHOTOS */
+function renderMulti(key,container){
+    const data = JSON.parse(localStorage.getItem(key)||"[]");
+    container.innerHTML="";
+    data.forEach(src=>{
+        const img=document.createElement("img");
+        img.src=src;
+        container.appendChild(img);
+    });
+}
+renderMulti("announcePhotos",document.getElementById("announcePhotos"));
+renderMulti("trendPhotos",document.getElementById("trendPhotos"));
+
+/* ANNOUNCE SLIDE */
+let i=0;
+setInterval(()=>{
+    const imgs=document.querySelectorAll("#announcePhotos img");
+    if(!imgs.length) return;
+    imgs.forEach(x=>x.classList.remove("active"));
+    imgs[i].classList.add("active");
+    i=(i+1)%imgs.length;
+},5000);
+
+/* QUICK LINKS */
+const quickLinks = JSON.parse(localStorage.getItem("quickLinks")||"[]");
+const ul = document.getElementById("quickLinksList");
+quickLinks.forEach(link=>{
+    const li=document.createElement("li");
+    const a=document.createElement("a");
+    a.href=link.url;
+    a.textContent=link.name;
+    a.target="_blank";
+    li.appendChild(a);
+    ul.appendChild(li);
+});
+</script>
+
+</body>
+</html>

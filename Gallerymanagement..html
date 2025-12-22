@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kyabazinga College – Gallery Management</title>
+<style>
+    body {margin:0;padding:0;font-family:"Times New Roman", serif;background:#f4f4f4;}
+    header {background:#d40000;color:white;text-align:center;padding:25px 10px;}
+    .page-title {background:#a00000;color:white;text-align:center;padding:15px;font-size:20px;font-weight:bold;}
+    .container {width:90%;max-width:1000px;margin:30px auto;}
+    .card {background:white;padding:25px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);margin-bottom:30px;}
+    h2 {color:#d40000;}
+    input[type="file"] {width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid #ccc;font-family:"Times New Roman", serif;font-size:16px;}
+    button {margin-top:20px;padding:12px 20px;font-size:16px;font-weight:bold;border:none;border-radius:6px;cursor:pointer;background:#a00000;color:white;}
+    button:hover {opacity:0.9;}
+    .gallery img {max-width:220px;border-radius:6px;margin:10px;display:inline-block;}
+    .back-btn {margin-bottom:20px;padding:10px 18px;font-weight:bold;border:none;border-radius:6px;background:#002366;color:white;cursor:pointer;}
+    .back-btn:hover {opacity:0.9;}
+    footer {background:#002366;color:white;text-align:center;padding:15px;margin-top:40px;}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Gallery Management Portal</em></p>
+</header>
+
+<div class="page-title">Gallery Management</div>
+
+<div class="container">
+    <!-- Back Button to Visitor Management -->
+    <button class="back-btn" onclick="window.location.href='visitormanagement.html'">← Back to Visitor Management</button>
+
+    <div class="card">
+        <h2>Add Gallery Photo</h2>
+        <input type="file" id="photoFile" accept="image/*">
+        <button type="button" onclick="addPhoto()">Add Photo</button>
+    </div>
+
+    <div class="card">
+        <h2>Gallery</h2>
+        <div class="gallery" id="galleryContainer"></div>
+    </div>
+</div>
+
+<footer>
+    <p>© <span id="year"></span> Kyabazinga College</p>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// Key for localStorage
+const STORAGE_KEY = 'galleryPhotos';
+let gallery = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+const galleryContainer = document.getElementById('galleryContainer');
+
+// Function to render the gallery
+function renderGallery(){
+    galleryContainer.innerHTML = '';
+    gallery.forEach((url, index) => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Gallery Photo ${index+1}`;
+        galleryContainer.appendChild(img);
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery));
+}
+
+// Function to add a photo with resizing
+function addPhoto(){
+    const fileInput = document.getElementById('photoFile');
+    const file = fileInput.files[0];
+    if(!file){ alert('Please select a photo from your files'); return; }
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function(){
+            // Resize image if too large
+            const MAX_WIDTH = 500;
+            const MAX_HEIGHT = 500;
+            let width = img.width;
+            let height = img.height;
+
+            if(width > MAX_WIDTH || height > MAX_HEIGHT){
+                const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+                width = width * scale;
+                height = height * scale;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Convert to JPEG and compress
+            const dataURL = canvas.toDataURL('image/jpeg', 0.7);
+
+            gallery.push(dataURL);      // Save photo
+            renderGallery();            // Update gallery
+            fileInput.value = '';       // Reset input
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+// Initial render
+renderGallery();
+</script>
+
+</body>
+</html>

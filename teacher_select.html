@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Subject & Class</title>
+<style>
+body { font-family:"Times New Roman", serif; background:#f4f4f4; margin:0; padding:0; }
+.container { width:90%; max-width:400px; margin:50px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+select, button { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
+button { background:#d40000; color:white; border:none; cursor:pointer; font-weight:bold; }
+button:hover { background:#a00000; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Select Subject and Class</h2>
+    <select id="subjectSelect"></select>
+    <select id="classSelect"></select>
+    <button onclick="proceed()">Proceed</button>
+    <button onclick="back()">← Back</button>
+</div>
+
+<script>
+let teacher = JSON.parse(localStorage.getItem("loggedInTeacher"));
+if(!teacher) window.location.href = "teacher_login.html";
+
+let subjectSelect = document.getElementById("subjectSelect");
+let classSelect = document.getElementById("classSelect");
+
+// Populate subjects
+subjectSelect.innerHTML = `<option value="">--Select Subject--</option>`;
+teacher.subjectClassMapping.forEach(scm=>{
+    const opt = document.createElement("option");
+    opt.value = scm.subject;
+    opt.textContent = scm.subject;
+    subjectSelect.appendChild(opt);
+});
+
+// Populate classes when subject is selected
+subjectSelect.addEventListener("change", ()=>{
+    classSelect.innerHTML = `<option value="">--Select Class--</option>`;
+    const mapping = teacher.subjectClassMapping.find(s => s.subject === subjectSelect.value);
+    if(mapping){
+        mapping.classes.forEach(c=>{
+            const opt = document.createElement("option");
+            opt.value = c;
+            opt.textContent = c;
+            classSelect.appendChild(opt);
+        });
+    }
+});
+
+function proceed(){
+    if(!subjectSelect.value || !classSelect.value){
+        alert("Select both subject and class");
+        return;
+    }
+    localStorage.setItem("selectedSubject", subjectSelect.value);
+    localStorage.setItem("selectedClass", classSelect.value);
+    window.location.href = "teacher_assign.html";
+}
+
+function back(){
+    localStorage.removeItem("loggedInTeacher");
+    window.location.href = "teacher_login.html";
+}
+</script>
+
+</body>
+</html>

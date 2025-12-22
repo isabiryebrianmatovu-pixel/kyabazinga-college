@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Administrator</title>
+
+<style>
+body {margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header {background:#d40000;color:white;padding:30px 10px;text-align:center;}
+header img {width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+
+nav.button-nav {
+    background:#a00000;
+    padding:12px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+}
+
+nav.button-nav a.nav-btn {
+    display:inline-block;
+    background:white;
+    color:#a00000;
+    padding:10px 18px;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:17px;
+    border-radius:6px;
+    border:2px solid #a00000;
+    transition:0.3s;
+}
+
+nav.button-nav a.nav-btn:hover {
+    background:#a00000;
+    color:white;
+}
+
+.container {width:90%;margin:auto;padding-top:20px;}
+
+.section {
+    background:white;
+    padding:25px;
+    margin:20px 0;
+    border-radius:8px;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.1);
+}
+
+.section h2 {color:#d40000;}
+
+.admin-btn {
+    display:inline-block;
+    padding:10px 20px;
+    margin:10px 5px 0 0;
+    background:#d40000;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.admin-btn:hover {background:#a00000;}
+
+footer {
+    background:#002366;
+    color:white;
+    padding:20px;
+    text-align:center;
+    margin-top:20px;
+}
+
+input[type="text"], input[type="file"], textarea {
+    padding:8px;
+    margin:5px 0;
+    width:100%;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+
+ul.admin-list {
+    list-style-type:none;
+    padding-left:0;
+}
+
+ul.admin-list li {
+    margin-bottom:5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+ul.admin-list li button {
+    margin-left:10px;
+    background:#d40000;
+    color:white;
+    border:none;
+    border-radius:4px;
+    padding:2px 6px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img src="badge.png" alt="School Badge" id="adminBadge">
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Administrator Dashboard</em></p>
+</header>
+
+<!-- Navigation Buttons -->
+<nav class="button-nav">
+    <a href="index.html" class="nav-btn">HOME</a>
+    <a href="studentsmanagement.html" class="nav-btn">STUDENTS</a>
+    <a href="teachersmanagement.html" class="nav-btn">TEACHERS</a>
+    <a href="subjectmanagement.html" class="nav-btn">SUBJECTS</a>
+    <a href="visitormanagement.html" class="nav-btn">VISITORS</a>
+    <a href="hometext.html" class="nav-btn">HOME TEXTS</a>
+    <a href="homephotos.html" class="nav-btn">HOME PHOTOS</a>
+    <a href="fees.html" class="nav-btn">FEES</a>
+    <a href="viewsuggestions.html" class="nav-btn">SUGGESTIONS</a>
+    
+    <!-- NEW BUTTON -->
+</nav>
+
+<div class="container">
+    
+        <h2> YOU BEING AT THIS PAGE YOU ARE AN ADMINISTRATOR 
+            if you are not please its illegal
+        </h2>
+    
+</div>
+
+<footer>
+    <p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("adminBadge").src = localStorage.getItem("schoolBadge") || "badge.png";
+
+visionInput.value = localStorage.getItem("visionText") || "";
+missionInput.value = localStorage.getItem("missionText") || "";
+
+function saveVision(){localStorage.setItem("visionText", visionInput.value);}
+function saveMission(){localStorage.setItem("missionText", missionInput.value);}
+
+coreValuesInput.value = localStorage.getItem("coreValues") ?
+JSON.parse(localStorage.getItem("coreValues")).join(",") : "";
+
+function saveCoreValues(){
+    localStorage.setItem("coreValues",
+        JSON.stringify(coreValuesInput.value.split(",").map(v=>v.trim())));
+}
+
+let quickLinks = JSON.parse(localStorage.getItem("quickLinks") || "[]");
+function renderQuickLinks(){
+    quickLinksList.innerHTML="";
+    quickLinks.forEach((l,i)=>{
+        const li=document.createElement("li");
+        li.innerHTML=`${l.name} | ${l.url}
+        <button onclick="delQL(${i})">Delete</button>`;
+        quickLinksList.appendChild(li);
+    });
+}
+function addQuickLink(){
+    quickLinks.push({name:quickLinkName.value,url:quickLinkURL.value});
+    localStorage.setItem("quickLinks",JSON.stringify(quickLinks));
+    quickLinkName.value=quickLinkURL.value="";
+    renderQuickLinks();
+}
+function delQL(i){
+    quickLinks.splice(i,1);
+    localStorage.setItem("quickLinks",JSON.stringify(quickLinks));
+    renderQuickLinks();
+}
+renderQuickLinks();
+</script>
+
+</body>
+</html>

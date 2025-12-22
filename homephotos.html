@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Home Photos</title>
+<style>
+body{margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header{background:#d40000;color:white;text-align:center;padding:30px 10px;}
+.container{width:90%;margin:auto;padding-top:20px;}
+.section{background:white;padding:25px;margin-bottom:25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.section h2{color:#d40000;}
+input[type="file"]{width:100%;margin:10px 0;}
+.admin-btn{background:#d40000;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;}
+.admin-btn:hover{background:#a00000;}
+.preview{margin-top:10px;max-width:200px;display:block;border:1px solid #ccc;}
+.multi-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.multi-preview img{max-width:120px;border:1px solid #ccc;border-radius:4px;}
+.multi-preview button{background:#d40000;color:white;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;margin-top:2px;}
+footer{background:#002366;color:white;text-align:center;padding:20px;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Home Page Photos Management</em></p>
+</header>
+
+<div class="container">
+    
+    <nav class="button-nav">
+       <a href="administrator.html" class="nav-btn">BACK</a>
+    </nav>
+
+<div class="section">
+    <h2>School Badge</h2>
+    <input type="file" id="badgePhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('schoolBadge','badgePhotoInput','badgePreview')">Save Badge</button>
+    <img id="badgePreview" class="preview">
+</div>
+
+<div class="section">
+    <h2>Head Teacher’s Message Photo</h2>
+    <input type="file" id="htPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('htPhoto','htPhotoInput','htPreview')">Save Photo</button>
+    <img id="htPreview" class="preview">
+</div>
+
+<div class="section">
+    <h2>Vision Section Photo</h2>
+    <input type="file" id="visionPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('visionPhoto','visionPhotoInput','visionPreview')">Save Photo</button>
+    <img id="visionPreview" class="preview">
+</div>
+
+<div class="section">
+    <h2>Mission Section Photo</h2>
+    <input type="file" id="missionPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('missionPhoto','missionPhotoInput','missionPreview')">Save Photo</button>
+    <img id="missionPreview" class="preview">
+</div>
+
+<div class="section">
+    <h2>Values Section Photo</h2>
+    <input type="file" id="valuesPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('valuesPhoto','valuesPhotoInput','valuesPreview')">Save Photo</button>
+    <img id="valuesPreview" class="preview">
+</div>
+
+<div class="section">
+    <h2>Announcements Section Photos</h2>
+    <input type="file" id="announcePhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="addMultiPhoto('announcePhotos','announcePhotoInput','announcePreview')">Add Photo</button>
+    <div id="announcePreview" class="multi-preview"></div>
+</div>
+
+<div class="section">
+    <h2>Trending at Campus Photos</h2>
+    <input type="file" id="trendPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="addMultiPhoto('trendPhotos','trendPhotoInput','trendPreview')">Add Photo</button>
+    <div id="trendPreview" class="multi-preview"></div>
+</div>
+
+<div class="section">
+    <h2>Quick Links</h2>
+    <input type="file" id="linksPhotoInput" accept="image/*">
+    <button class="admin-btn" onclick="savePhoto('linksPhoto','linksPhotoInput','linksPreview')">Save Photo</button>
+    <img id="linksPreview" class="preview">
+</div>
+
+</div>
+
+<footer>
+    <p>© 2025 Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+function savePhoto(storageKey,inputId,previewId){
+    const file=document.getElementById(inputId).files[0];
+    if(!file){alert("Please select an image."); return;}
+    const reader=new FileReader();
+    reader.onload=function(e){
+        localStorage.setItem(storageKey,e.target.result);
+        document.getElementById(previewId).src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function addMultiPhoto(storageKey,inputId,previewId){
+    const file=document.getElementById(inputId).files[0];
+    if(!file){alert("Please select an image."); return;}
+    const reader=new FileReader();
+    reader.onload=function(e){
+        let photos=JSON.parse(localStorage.getItem(storageKey)||"[]");
+        photos.push(e.target.result);
+        localStorage.setItem(storageKey,JSON.stringify(photos));
+        renderMultiPhotos(storageKey,previewId);
+    };
+    reader.readAsDataURL(file);
+}
+
+function renderMultiPhotos(storageKey,previewId){
+    const container=document.getElementById(previewId);
+    container.innerHTML="";
+    let photos=JSON.parse(localStorage.getItem(storageKey)||"[]");
+    photos.forEach((src,index)=>{
+        const wrapper=document.createElement("div");
+        const img=document.createElement("img");
+        img.src=src;
+        const btn=document.createElement("button");
+        btn.textContent="Delete";
+        btn.onclick=function(){
+            photos.splice(index,1);
+            localStorage.setItem(storageKey,JSON.stringify(photos));
+            renderMultiPhotos(storageKey,previewId);
+        };
+        wrapper.appendChild(img);
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
+    });
+}
+
+window.onload=function(){
+    const singlePhotos=[
+        ["schoolBadge","badgePreview"],
+        ["htPhoto","htPreview"],
+        ["visionPhoto","visionPreview"],
+        ["missionPhoto","missionPreview"],
+        ["valuesPhoto","valuesPreview"],
+        ["linksPhoto","linksPreview"]
+    ];
+    singlePhotos.forEach(p=>{
+        const saved=localStorage.getItem(p[0]);
+        if(saved) document.getElementById(p[1]).src=saved;
+    });
+
+    renderMultiPhotos("announcePhotos","announcePreview");
+    renderMultiPhotos("trendPhotos","trendPreview");
+};
+</script>
+
+</body>
+</html>

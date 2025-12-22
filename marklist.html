@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>General Marklist</title>
+<style>
+body {
+    font-family: "Times New Roman", serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+header {
+    text-align: center;
+    color: #d40000;
+    margin-bottom: 20px;
+}
+select {
+    width: 200px;
+    padding: 8px;
+    margin: 10px auto;
+    display: block;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+button.back-btn {
+    padding: 8px 15px;
+    background: #555;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+button.back-btn:hover {
+    background: #333;
+}
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
+    width: 100%;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #d40000;
+    color: white;
+}
+tfoot td {
+    font-weight: bold;
+    background: #eee;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <button class="back-btn" onclick="goBack()">← BACK</button>
+    <h1>General Marklist</h1>
+    <label for="classSelect">Select Class:</label>
+    <select id="classSelect">
+        <option value="">-- Select Class --</option>
+    </select>
+</header>
+
+<table id="marklistTable">
+    <thead>
+        <tr id="headerSubjects">
+            <th rowspan="2">Student Name</th>
+            <th rowspan="2">Student Number</th>
+        </tr>
+        <tr id="headerPapers"></tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot id="footerAggregates"></tfoot>
+</table>
+
+<script>
+// Load classes and students
+const classes = JSON.parse(localStorage.getItem("classes") || "[]");
+const students = JSON.parse(localStorage.getItem("students") || "[]");
+
+// Initialize marks for all students if missing
+students.forEach(student => {
+    if(!student.marks) student.marks = {};
+    student.subjects.forEach(subj => {
+        if(!student.marks[subj]) student.marks[subj] = {paper1:"-", paper2:"-", paper3:"-"};
+    });
+});
+localStorage.setItem("students", JSON.stringify(students));
+
+// Populate class dropdown
+const classSelect = document.getElementById("classSelect");
+classes.forEach(cls => {
+    const option = document.createElement("option");
+    option.value = cls;
+    option.textContent = cls;
+    classSelect.appendChild(option);
+});
+
+// Back button
+function goBack() {
+    window.location.href = "administrator.html";
+}
+
+// Function to get grade for a mark
+function getGrade(mark){
+    if(mark === "-" || mark === null || mark === undefined) return "-";
+    mark = Number(mark);
+    if(mark >= 80) return "A";
+    if(mark >= 70) return "B";
+    if(mark >= 60) return "C";
+    if(mark >= 50) return "D";
+    return "F";
+}
+
+// Render marklist
+classSelect.addEventListener("change", function() {
+    renderMarklist(this.value);
+});
+
+function renderMarklist(selectedClass){
+    const tbody = document.querySelector("#marklistTable tbody");
+    const headerSubjects = document.getElementById("headerSubjects");
+    const headerPapers = document.getElementById("headerPapers");
+    const footerAggregates = document.getElementById("footerAggregates");
+
+    tbody.innerHTML = "";
+    headerSubjects.innerHTML = `<th rowspan="2">Student Name</th><th rowspan="2">Student Number</th>`;
+    headerPapers.innerHTML = "";
+    footerAggregates.innerHTML = "";
+
+    if(!selectedClass) return;
+
+    const filteredStudents = students.filter(s => s.class === selectedClass);
+    if(filteredStudents.length === 0){
+        tbody.innerHTML = "<tr><td colspan='2'>No students in this class.</td></tr>";
+        return;
+    }
+
+    // Get all subjects
+    const allSubjects = Array.from(new Set(filteredStudents.flatMap(s => s.subjects || [])));
+
+    // Build headers
+    allSubjects.forEach(subj => {
+        const th = document.createElement("th");
+        th.colSpan = 7; // Paper1 + Aggregate + Paper2 + Aggregate + Paper3 + Aggregate + Points
+        th.textContent = subj;
+        headerSubjects.appendChild(th);
+
+        ["Paper 1","Aggregate","Paper 2","Aggregate","Paper 3","Aggregate","Total Points"].forEach(text => {
+            const thPaper = document.createElement("th");
+            thPaper.textContent = text;
+            headerPapers.appendChild(thPaper);
+        });
+    });
+
+    // Overall total points header
+    const thTotal = document.createElement("th");
+    thTotal.rowSpan = 2;
+    thTotal.textContent = "Overall Total Points";
+    headerSubjects.appendChild(thTotal);
+
+    // Prepare aggregates
+    const aggregates = {};
+    allSubjects.forEach(subj => {
+        aggregates[subj] = {paper1:0, paper2:0, paper3:0};
+    });
+
+    // Populate student rows
+    filteredStudents.forEach(student => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${student.name}</td><td>${student.number || "-"}</td>`;
+        let overallTotal = 0;
+
+        allSubjects.forEach(subj => {
+            const paperMarks = student.marks && student.marks[subj] ? student.marks[subj] : {paper1:"-", paper2:"-", paper3:"-"};
+            const p1 = paperMarks.paper1;
+            const p2 = paperMarks.paper2;
+            const p3 = paperMarks.paper3;
+            const points1 = getGrade(p1);
+            const points2 = getGrade(p2);
+            const points3 = getGrade(p3);
+            const totalPoints = (points1!="-"? gradeToPoints(points1) : 0) + 
+                                (points2!="-"? gradeToPoints(points2) : 0) + 
+                                (points3!="-"? gradeToPoints(points3) : 0);
+            overallTotal += totalPoints;
+
+            tr.innerHTML += `<td>${p1}</td><td>${points1}</td>
+                             <td>${p2}</td><td>${points2}</td>
+                             <td>${p3}</td><td>${points3}</td>
+                             <td>${totalPoints}</td>`;
+
+            aggregates[subj].paper1 += points1!="-"? gradeToPoints(points1):0;
+            aggregates[subj].paper2 += points2!="-"? gradeToPoints(points2):0;
+            aggregates[subj].paper3 += points3!="-"? gradeToPoints(points3):0;
+        });
+
+        tr.innerHTML += `<td>${overallTotal}</td>`;
+        tbody.appendChild(tr);
+    });
+
+    // Aggregate row
+    const trAgg = document.createElement("tr");
+    trAgg.innerHTML = "<td colspan='2'>Aggregate (All Students)</td>";
+    let overallAgg = 0;
+    allSubjects.forEach(subj => {
+        const p1 = aggregates[subj].paper1;
+        const p2 = aggregates[subj].paper2;
+        const p3 = aggregates[subj].paper3;
+        const total = p1 + p2 + p3;
+        overallAgg += total;
+        trAgg.innerHTML += `<td>-</td><td>-</td>
+                            <td>-</td><td>-</td>
+                            <td>-</td><td>-</td>
+                            <td>${total}</td>`;
+    });
+    trAgg.innerHTML += `<td>${overallAgg}</td>`;
+    footerAggregates.appendChild(trAgg);
+}
+
+// Convert grade to numeric points for aggregates
+function gradeToPoints(grade){
+    switch(grade){
+        case "A": return 5;
+        case "B": return 4;
+        case "C": return 3;
+        case "D": return 2;
+        case "F": return 1;
+        default: return 0;
+    }
+}
+</script>
+
+</body>
+</html>

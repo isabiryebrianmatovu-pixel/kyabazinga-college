@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Teachers Management</title>
+<style>
+body{margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header{background:#d40000;color:white;padding:30px 10px;text-align:center;}
+header img{width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+nav.button-nav{background:#a00000;padding:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+nav.button-nav a.nav-btn{background:white;color:#a00000;padding:10px 18px;text-decoration:none;font-weight:bold;font-size:17px;border-radius:6px;border:2px solid #a00000;transition:0.3s;}
+nav.button-nav a.nav-btn:hover{background:#a00000;color:white;}
+.container{width:90%;margin:auto;padding-top:20px;}
+.section{padding:25px;margin-bottom:25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:white;}
+.section h2{color:#d40000;margin-bottom:15px;}
+input[type="text"], input[type="number"], input[type="email"], input[type="file"], select{width:100%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
+.admin-btn{padding:10px 20px;margin-top:10px;background:#d40000;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+.admin-btn:hover{background:#a00000;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+table th, table td{border:1px solid #ccc;padding:8px;text-align:left;}
+table th{background:#f2f2f2;color:#d40000;}
+img.teacher-photo{width:50px;height:50px;border-radius:4px;object-fit:cover;}
+button.action-btn{padding:5px 10px;background:#d40000;color:white;border:none;border-radius:4px;cursor:pointer;}
+button.action-btn:hover{background:#a00000;}
+footer{background:#002366;color:white;text-align:center;padding:20px;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<header>
+<img src="badge.png" alt="School Badge" id="adminBadge">
+<h1>KYABAZINGA COLLEGE</h1>
+<p><em>Teachers Management</em></p>
+</header>
+
+<nav class="button-nav">
+<a href="administrator.html" class="nav-btn">BACK</a>
+</nav>
+
+<div class="container">
+
+<div class="section">
+    <h2>Add New Teacher</h2>
+    <input type="text" id="teacherName" placeholder="Full Name (Required)">
+    <input type="text" id="teacherPhone" placeholder="Telephone Number">
+    <input type="number" id="yearEmployed" placeholder="Year Employed (Required)">
+    <input type="text" id="teacherNID" placeholder="National ID Number (Required)">
+    <input type="text" id="teacherPassword" placeholder="Password (Required)">
+    <input type="text" id="teacherContact" placeholder="Contact Person (Optional)">
+    <input type="email" id="teacherEmail" placeholder="Email (Optional)">
+    <input type="text" id="teacherAddress" placeholder="Address">
+    <input type="file" id="teacherPhoto" accept="image/*">
+
+    <label>Select Subject</label>
+    <select id="teacherSubjectsSelect">
+        <option value="">--Select Subject--</option>
+    </select>
+
+    <label>Select Classes for this Subject</label>
+    <select id="teacherClassesSelect" multiple size="5"></select>
+
+    <button class="admin-btn" onclick="addSubjectClassMapping()">Add Subject with Classes</button>
+
+    <h3>Subject-Class Assignments</h3>
+    <table id="subjectClassTable">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Classes</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button class="admin-btn" onclick="addTeacher()">Add Teacher</button>
+</div>
+
+<div class="section">
+    <h2>Current Teachers</h2>
+    <table id="teachersTable">
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Telephone</th>
+                <th>Year Employed</th>
+                <th>NID</th>
+                <th>Password</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Subjects & Classes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+</div>
+
+<footer>
+<p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("adminBadge").src = localStorage.getItem("schoolBadge") || "badge.png";
+
+// Predefined subjects and classes
+let subjects = JSON.parse(localStorage.getItem("subjects") || '["Mathematics","Biology","Chemistry","Physics","English"]');
+let classes = JSON.parse(localStorage.getItem("classes") || '["S1","S2","S3","S4","S5"]');
+let teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+
+// Populate subject and class selects
+const teacherSubjectsSelect = document.getElementById("teacherSubjectsSelect");
+const teacherClassesSelect = document.getElementById("teacherClassesSelect");
+const subjectClassTableBody = document.getElementById("subjectClassTable").querySelector("tbody");
+
+subjects.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    teacherSubjectsSelect.appendChild(opt);
+});
+classes.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    teacherClassesSelect.appendChild(opt);
+});
+
+let tempSubjectClassMapping = [];
+
+function addSubjectClassMapping(){
+    const subject = teacherSubjectsSelect.value;
+    const selectedClasses = Array.from(teacherClassesSelect.selectedOptions).map(o => o.value);
+    if(!subject || selectedClasses.length === 0){
+        alert("Select a subject and at least one class.");
+        return;
+    }
+    tempSubjectClassMapping.push({subject, classes:selectedClasses});
+    renderSubjectClassTable();
+    teacherSubjectsSelect.value = "";
+    Array.from(teacherClassesSelect.options).forEach(o => o.selected = false);
+}
+
+function renderSubjectClassTable(){
+    subjectClassTableBody.innerHTML = "";
+    tempSubjectClassMapping.forEach((item,index)=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${item.subject}</td><td>${item.classes.join(", ")}</td><td><button class="action-btn" onclick="removeSubjectClass(${index})">Remove</button></td>`;
+        subjectClassTableBody.appendChild(tr);
+    });
+}
+
+function removeSubjectClass(index){
+    tempSubjectClassMapping.splice(index,1);
+    renderSubjectClassTable();
+}
+
+function addTeacher(){
+    const name = document.getElementById("teacherName").value.trim();
+    const yearEmployed = document.getElementById("yearEmployed").value.trim();
+    const nid = document.getElementById("teacherNID").value.trim();
+    const password = document.getElementById("teacherPassword").value.trim();
+    const phone = document.getElementById("teacherPhone").value.trim();
+    const contact = document.getElementById("teacherContact").value.trim();
+    const email = document.getElementById("teacherEmail").value.trim();
+    const address = document.getElementById("teacherAddress").value.trim();
+
+    if(!name || !yearEmployed || !nid || !password){
+        alert("Full Name, Year Employed, NID, and Password are required.");
+        return;
+    }
+    if(tempSubjectClassMapping.length === 0){
+        alert("Add at least one subject with classes.");
+        return;
+    }
+
+    const photoInput = document.getElementById("teacherPhoto");
+
+    const saveTeacher = (photoData) => {
+        teachers.push({
+            name,
+            yearEmployed,
+            nid,
+            password, // store password
+            phone,
+            contact,
+            email,
+            address,
+            photo: photoData,
+            subjectClassMapping:[...tempSubjectClassMapping]
+        });
+        localStorage.setItem("teachers", JSON.stringify(teachers));
+        renderTeachers();
+        resetForm();
+    }
+
+    if(photoInput.files && photoInput.files[0]){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            saveTeacher(e.target.result);
+        }
+        reader.readAsDataURL(photoInput.files[0]);
+    } else {
+        saveTeacher("");
+    }
+}
+
+function resetForm(){
+    document.getElementById("teacherName").value="";
+    document.getElementById("yearEmployed").value="";
+    document.getElementById("teacherNID").value="";
+    document.getElementById("teacherPassword").value="";
+    document.getElementById("teacherPhone").value="";
+    document.getElementById("teacherContact").value="";
+    document.getElementById("teacherEmail").value="";
+    document.getElementById("teacherAddress").value="";
+    document.getElementById("teacherPhoto").value="";
+    tempSubjectClassMapping = [];
+    renderSubjectClassTable();
+}
+
+function renderTeachers(){
+    const tbody = document.getElementById("teachersTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    if(teachers.length === 0){
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No teachers added yet.</td></tr>`;
+        return;
+    }
+    teachers.forEach((t,index)=>{
+        const tr = document.createElement("tr");
+        tr.appendChild(tdWithImg(t.photo));
+        tr.appendChild(td(t.name));
+        tr.appendChild(td(t.phone || "-"));
+        tr.appendChild(td(t.yearEmployed));
+        tr.appendChild(td(t.nid));
+        tr.appendChild(td(t.password)); // show password for admin
+        tr.appendChild(td(t.contact || "-"));
+        tr.appendChild(td(t.email || "-"));
+        tr.appendChild(td(t.address || "-"));
+        const subjClasses = t.subjectClassMapping.map(sc => `${sc.subject}: ${sc.classes.join(", ")}`).join(" | ");
+        tr.appendChild(td(subjClasses));
+
+        const actionsTd = document.createElement("td");
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "action-btn";
+        delBtn.onclick = ()=>{
+            if(confirm(`Delete ${t.name} permanently?`)){
+                teachers.splice(index,1);
+                localStorage.setItem("teachers", JSON.stringify(teachers));
+                renderTeachers();
+            }
+        };
+        actionsTd.appendChild(delBtn);
+        tr.appendChild(actionsTd);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function td(content){ const td = document.createElement("td"); td.textContent = content; return td; }
+function tdWithImg(src){ const td = document.createElement("td"); const img = document.createElement("img"); img.src = src || "badge.png"; img.className = "teacher-photo"; td.appendChild(img); return td; }
+
+renderTeachers();
+</script>
+</body>
+</html>

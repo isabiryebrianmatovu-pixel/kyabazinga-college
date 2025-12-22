@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gallery Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- =======================
+         PAGE STYLING
+    ======================== -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", serif;
+            background: #f2f2f2;
+        }
+
+        header {
+            background: #8b0000;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* ===== Back Button ===== */
+        .back-btn {
+            background: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #222;
+        }
+
+        /* ===== Upload Form ===== */
+        .upload-box {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: #8b0000;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #a00000;
+        }
+
+        /* ===== Gallery Grid ===== */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .photo-box {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        .photo-box img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            margin-top: 8px;
+            background: #555;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #333;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>School Gallery Management</h1>
+</header>
+
+<div class="container">
+
+    <!-- =======================
+         BACK BUTTON
+    ======================== -->
+    <button class="back-btn"
+            onclick="window.location.href='visitormanagement.html'">
+        ← Back to Visitor Management
+    </button>
+
+    <!-- =======================
+         UPLOAD SECTION
+    ======================== -->
+    <div class="upload-box">
+        <h2>Add New Photo</h2>
+
+        <input type="file" id="photoInput" accept="image/*">
+
+        <button onclick="savePhoto()">Save Photo</button>
+    </div>
+
+    <!-- =======================
+         GALLERY DISPLAY
+    ======================== -->
+    <h2>Saved Photos</h2>
+    <div class="gallery" id="gallery"></div>
+
+</div>
+
+<footer>
+    Preserving moments, building the future.
+</footer>
+
+<!-- =======================
+     JAVASCRIPT LOGIC
+======================== -->
+<script>
+    // Load gallery when page opens
+    document.addEventListener("DOMContentLoaded", loadGallery);
+
+    // Save photo to localStorage
+    function savePhoto() {
+        const input = document.getElementById("photoInput");
+
+        if (!input.files[0]) {
+            alert("Please select an image.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            let photos = JSON.parse(localStorage.getItem("galleryPhotos")) || [];
+            photos.push(reader.result);
+            localStorage.setItem("galleryPhotos", JSON.stringify(photos));
+
+            // Clear input for next upload
+            input.value = "";
+
+            loadGallery();
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    // Display gallery
+    function loadGallery() {
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = "";
+
+        let photos = JSON.parse(localStorage.getItem("galleryPhotos")) || [];
+
+        photos.forEach((photo, index) => {
+            const box = document.createElement("div");
+            box.className = "photo-box";
+
+            box.innerHTML = `
+                <img src="${photo}">
+                <button class="delete-btn" onclick="deletePhoto(${index})">
+                    Delete
+                </button>
+            `;
+
+            gallery.appendChild(box);
+        });
+    }
+
+    // Delete photo
+    function deletePhoto(index) {
+        let photos = JSON.parse(localStorage.getItem("galleryPhotos")) || [];
+        photos.splice(index, 1);
+        localStorage.setItem("galleryPhotos", JSON.stringify(photos));
+        loadGallery();
+    }
+</script>
+
+</body>
+</html>

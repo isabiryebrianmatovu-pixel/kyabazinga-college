@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Student Dashboard</title>
+
+<style>
+body{
+    font-family:"Times New Roman", serif;
+    background:#f4f4f4;
+    margin:0;
+    padding:0;
+}
+header{
+    background:#d40000;
+    color:white;
+    text-align:center;
+    padding:20px 10px;
+}
+.container{
+    width:90%;
+    max-width:600px;
+    margin:40px auto;
+    padding:20px;
+    background:white;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+h2{
+    text-align:center;
+    color:#d40000;
+}
+p{
+    font-size:16px;
+    margin:10px 0;
+}
+button{
+    padding:10px 15px;
+    background:#d40000;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+    margin:10px 5px 0 0;
+}
+button:hover{
+    background:#a00000;
+}
+.button-group{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Kyabazinga College</h1>
+    <p>Student Dashboard</p>
+</header>
+
+<div class="container">
+    <h2>Welcome, <span id="studentName"></span></h2>
+
+    <p><strong>Class:</strong> <span id="studentClass"></span></p>
+    <p><strong>Student Number:</strong> <span id="studentNumber"></span></p>
+    <p><strong>Age:</strong> <span id="studentAge"></span></p>
+    <p><strong>Parent Contact:</strong> <span id="studentContact"></span></p>
+    <p><strong>Address:</strong> <span id="studentAddress"></span></p>
+
+    <div class="button-group">
+        <button onclick="viewMarks()">View Marklist</button>
+        <button onclick="openSuggestionBox()">Suggestion Box</button>
+        <button onclick="openLibrary()">Library</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<script>
+// Get logged-in student from localStorage
+const student = JSON.parse(localStorage.getItem("loggedInStudent"));
+
+// Redirect to login if not logged in
+if(!student){
+    window.location.href = "studentlogin.html";
+}else{
+    document.getElementById("studentName").textContent = student.name;
+    document.getElementById("studentClass").textContent = student.class;
+    document.getElementById("studentNumber").textContent = student.number;
+    document.getElementById("studentAge").textContent = student.age || "-";
+    document.getElementById("studentContact").textContent = student.contact || "-";
+    document.getElementById("studentAddress").textContent = student.address || "-";
+}
+
+// Page navigation
+function viewMarks(){
+    window.location.href = "mymarklist.html";
+}
+
+function openSuggestionBox(){
+    window.location.href = "studentssuggestions.html";
+}
+
+function openLibrary(){
+    window.location.href = "studentslibrary.html";
+}
+
+// Logout
+function logout(){
+    localStorage.removeItem("loggedInStudent");
+    window.location.href = "studentlogin.html";
+}
+</script>
+
+</body>
+</html>

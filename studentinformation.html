@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Students Information</title>
+
+<style>
+/* ================= GENERAL STYLES ================= */
+body{margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header{background:#d40000;color:white;padding:30px 10px;text-align:center;}
+header img{width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+nav.button-nav{background:#a00000;padding:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+nav.button-nav a.nav-btn{background:white;color:#a00000;padding:10px 18px;text-decoration:none;font-weight:bold;font-size:17px;border-radius:6px;border:2px solid #a00000;transition:0.3s;}
+nav.button-nav a.nav-btn:hover{background:#a00000;color:white;}
+.container{width:90%;margin:auto;padding-top:20px;}
+.section{padding:25px;margin-bottom:25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:white;}
+.section h2{color:#d40000;margin-bottom:15px;}
+select{width:100%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
+.total-students{margin:10px 0;font-weight:bold;color:#d40000;}
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+table th, table td{border:1px solid #ccc;padding:8px;text-align:left;}
+table th{background:#f2f2f2;color:#d40000;}
+img.student-photo{width:50px;height:50px;border-radius:4px;object-fit:cover;}
+button.result-btn{padding:5px 10px;background:#d40000;color:white;border:none;border-radius:4px;cursor:pointer;}
+button.result-btn:hover{background:#a00000;}
+footer{background:#002366;color:white;text-align:center;padding:20px;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+<img src="badge.png" alt="School Badge" id="adminBadge">
+<h1>KYABAZINGA COLLEGE</h1>
+<p><em>Students Information</em></p>
+</header>
+<!-- ================= END HEADER ================= -->
+
+<!-- ================= NAVIGATION ================= -->
+<nav class="button-nav">
+<a href="administrator.html" class="nav-btn">BACK TO ADMINISTRATOR</a>
+<a href="studentsmanagement.html" class="nav-btn">BACK</a>
+<a href="studentshistory.html" class="nav-btn">PASSED STUDENTS</a>
+
+</nav>
+<!-- ================= END NAVIGATION ================= -->
+
+<div class="container">
+
+    <div class="section">
+        <!-- Plain heading, not a link -->
+        <h2>Select Class to View Students</h2>
+        <select id="classSelect">
+            <option value="">-- Select Class --</option>
+        </select>
+
+        <!-- Total students in selected class -->
+        <div class="total-students" id="totalStudents" style="display:none;"></div>
+
+        <table id="studentsTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Student No</th>
+                    <th>Age</th>
+                    <th>Parent Contact</th>
+                    <th>Address</th>
+                    <th>Subjects</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+<p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+// Display current year
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("adminBadge").src = localStorage.getItem("schoolBadge") || "badge.png";
+
+// Load classes from localStorage
+let classes = JSON.parse(localStorage.getItem("classes") || "[]");
+const classSelect = document.getElementById("classSelect");
+classes.forEach(cls => {
+    const option = document.createElement("option");
+    option.value = cls;
+    option.textContent = cls;
+    classSelect.appendChild(option);
+});
+
+// Load students from localStorage
+let students = JSON.parse(localStorage.getItem("students") || "[]");
+
+// Render students for selected class
+function renderStudentsForClass(){
+    const selectedClass = classSelect.value;
+    const table = document.getElementById("studentsTable");
+    const tbody = table.querySelector("tbody");
+    const totalDiv = document.getElementById("totalStudents");
+    tbody.innerHTML = "";
+
+    if(!selectedClass){
+        table.style.display = "none";
+        totalDiv.style.display = "none";
+        return;
+    }
+
+    const filteredStudents = students.filter(s => s.class === selectedClass);
+
+    totalDiv.style.display = "block";
+    totalDiv.textContent = `Total Students in ${selectedClass}: ${filteredStudents.length}`;
+
+    if(filteredStudents.length === 0){
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No students found in this class.</td></tr>`;
+    } else {
+        filteredStudents.forEach(student => {
+            const tr = document.createElement("tr");
+
+            const photoTd = document.createElement("td");
+            const img = document.createElement("img");
+            img.src = student.photo || "badge.png";
+            img.className = "student-photo";
+            photoTd.appendChild(img);
+
+            const nameTd = document.createElement("td"); nameTd.textContent = student.name;
+            const numberTd = document.createElement("td"); numberTd.textContent = student.number || "-";
+            const ageTd = document.createElement("td"); ageTd.textContent = student.age || "-";
+            const contactTd = document.createElement("td"); contactTd.textContent = student.contact || "-";
+            const addressTd = document.createElement("td"); addressTd.textContent = student.address || "-";
+            const subjectsTd = document.createElement("td"); subjectsTd.textContent = (student.subjects && student.subjects.length>0)? student.subjects.join(", "):"-";
+
+            const actionTd = document.createElement("td");
+            const resultsBtn = document.createElement("button");
+            resultsBtn.className = "result-btn";
+            resultsBtn.textContent = "Results";
+            resultsBtn.onclick = () => {
+                window.location.href = `marklist.html?studentNumber=${encodeURIComponent(student.number)}`;
+            };
+            actionTd.appendChild(resultsBtn);
+
+            tr.appendChild(photoTd);
+            tr.appendChild(nameTd);
+            tr.appendChild(numberTd);
+            tr.appendChild(ageTd);
+            tr.appendChild(contactTd);
+            tr.appendChild(addressTd);
+            tr.appendChild(subjectsTd);
+            tr.appendChild(actionTd);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    table.style.display = "table";
+}
+
+// Event listener
+classSelect.addEventListener("change", renderStudentsForClass);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assign Marks</title>
+<style>
+body { font-family:"Times New Roman", serif; background:#f4f4f4; margin:0; padding:0; }
+.container { width:90%; max-width:800px; margin:50px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+input, button { padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
+button { background:#d40000; color:white; border:none; cursor:pointer; font-weight:bold; }
+button:hover { background:#a00000; margin-right:5px; }
+table { width:100%; border-collapse:collapse; margin-top:15px; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+th { background-color:#d40000; color:white; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Assign Marks</h2>
+    <button onclick="back()">← Back</button>
+    <table id="studentsTable">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Paper 1</th>
+                <th>Paper 2</th>
+                <th>Paper 3</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button onclick="saveMarks()">Save Marks</button>
+</div>
+
+<script>
+let teacher = JSON.parse(localStorage.getItem("loggedInTeacher"));
+let subject = localStorage.getItem("selectedSubject");
+let cls = localStorage.getItem("selectedClass");
+let students = JSON.parse(localStorage.getItem("students") || "[]");
+
+if(!teacher || !subject || !cls) window.location.href = "teacher_login.html";
+
+let filteredStudents = students.filter(s => s.class === cls && s.subjects.includes(subject));
+let tbody = document.querySelector("#studentsTable tbody");
+filteredStudents.forEach((s,index)=>{
+    const row = document.createElement("tr");
+    const p1 = s.marks && s.marks[subject] ? s.marks[subject].paper1 || "" : "";
+    const p2 = s.marks && s.marks[subject] ? s.marks[subject].paper2 || "" : "";
+    const p3 = s.marks && s.marks[subject] ? s.marks[subject].paper3 || "" : "";
+    row.innerHTML = `
+        <td>${s.name}</td>
+        <td><input type="text" value="${p1}" data-index="${index}" data-paper="paper1" oninput="validateMark(this)"></td>
+        <td><input type="text" value="${p2}" data-index="${index}" data-paper="paper2" oninput="validateMark(this)"></td>
+        <td><input type="text" value="${p3}" data-index="${index}" data-paper="paper3" oninput="validateMark(this)"></td>
+    `;
+    tbody.appendChild(row);
+});
+
+function validateMark(input){
+    let val = input.value.toUpperCase();
+    if(val === "X") { input.value = "X"; return; }
+    val = val.replace(/[^0-9]/g,'');
+    if(val!==""){ let num = parseInt(val); if(num>100) num=100; input.value=num;} else {input.value="";}
+}
+
+function saveMarks(){
+    const inputs = document.querySelectorAll("#studentsTable tbody input");
+    inputs.forEach(input=>{
+        const idx = input.dataset.index;
+        const paper = input.dataset.paper;
+        let value = input.value.toUpperCase();
+        if(value!=="X") value = Number(value);
+        if(!filteredStudents[idx].marks) filteredStudents[idx].marks = {};
+        if(!filteredStudents[idx].marks[subject]) filteredStudents[idx].marks[subject] = {};
+        filteredStudents[idx].marks[subject][paper] = value;
+    });
+    // update main students array
+    students.forEach(s=>{
+        const fs = filteredStudents.find(f=>f.nid===s.nid);
+        if(fs) Object.assign(s,fs);
+    });
+    localStorage.setItem("students", JSON.stringify(students));
+    alert("Marks saved successfully!");
+}
+
+function back(){
+    window.location.href = "teacher_select.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- =======================
+         PAGE STYLING
+    ======================== -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", serif;
+            background: #f2f2f2;
+        }
+
+        header {
+            background: #003366;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* ===== Back Button ===== */
+        .back-btn {
+            background: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #222;
+        }
+
+        /* ===== Upload Section ===== */
+        .upload-box {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+        }
+
+        button {
+            background: #003366;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #004a99;
+        }
+
+        /* ===== Table ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #e6e6e6;
+        }
+
+        .delete-btn {
+            background: #555;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #333;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Library Management</h1>
+</header>
+
+<div class="container">
+
+    <!-- =======================
+         BACK BUTTON
+    ======================== -->
+    <button class="back-btn"
+            onclick="window.location.href='visitormanagement.html'">
+        ← Back to Visitor Management
+    </button>
+
+    <!-- =======================
+         UPLOAD SECTION
+    ======================== -->
+    <div class="upload-box">
+        <h2>Upload Learning Material</h2>
+
+        <!-- Class -->
+        <label for="classSelect">Select Class</label>
+        <select id="classSelect"></select>
+
+        <!-- Subject -->
+        <label for="subjectSelect">Select Subject</label>
+        <select id="subjectSelect"></select>
+
+        <!-- File -->
+        <label for="fileInput">Upload PDF or Word Document</label>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
+
+        <button onclick="saveDocument()">Save Document</button>
+    </div>
+
+    <!-- =======================
+         LIBRARY DISPLAY
+    ======================== -->
+    <h2>Saved Documents</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Document Name</th>
+                <th>Open</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody id="libraryTable"></tbody>
+    </table>
+
+</div>
+
+<footer>
+    Knowledge arranged by level, preserved with care.
+</footer>
+
+<!-- =======================
+     JAVASCRIPT LOGIC
+======================== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        loadClasses();
+        loadSubjects();
+        loadLibrary();
+    });
+
+    /* =======================
+       LOAD CLASSES
+    ======================== */
+    function loadClasses() {
+        const classSelect = document.getElementById("classSelect");
+        classSelect.innerHTML = "";
+
+        const classes = JSON.parse(localStorage.getItem("classes")) || [];
+
+        if (classes.length === 0) {
+            classSelect.innerHTML = "<option>No classes available</option>";
+            classSelect.disabled = true;
+            return;
+        }
+
+        classes.forEach(cls => {
+            const option = document.createElement("option");
+            option.value = cls;
+            option.textContent = cls;
+            classSelect.appendChild(option);
+        });
+    }
+
+    /* =======================
+       LOAD SUBJECTS
+    ======================== */
+    function loadSubjects() {
+        const subjectSelect = document.getElementById("subjectSelect");
+        subjectSelect.innerHTML = "";
+
+        const subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+
+        if (subjects.length === 0) {
+            subjectSelect.innerHTML = "<option>No subjects available</option>";
+            subjectSelect.disabled = true;
+            return;
+        }
+
+        subjects.forEach(sub => {
+            const option = document.createElement("option");
+            option.value = sub;
+            option.textContent = sub;
+            subjectSelect.appendChild(option);
+        });
+    }
+
+    /* =======================
+       SAVE DOCUMENT
+    ======================== */
+    function saveDocument() {
+        const cls = document.getElementById("classSelect").value;
+        const subject = document.getElementById("subjectSelect").value;
+        const fileInput = document.getElementById("fileInput");
+
+        if (!fileInput.files.length) {
+            alert("Please select a document.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function () {
+            const library = JSON.parse(localStorage.getItem("libraryDocs")) || [];
+
+            library.push({
+                class: cls,
+                subject: subject,
+                name: file.name,
+                data: reader.result
+            });
+
+            localStorage.setItem("libraryDocs", JSON.stringify(library));
+            fileInput.value = "";
+            loadLibrary();
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    /* =======================
+       LOAD TABLE
+    ======================== */
+    function loadLibrary() {
+        const table = document.getElementById("libraryTable");
+        table.innerHTML = "";
+
+        const library = JSON.parse(localStorage.getItem("libraryDocs")) || [];
+
+        library.forEach((doc, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${doc.class}</td>
+                <td>${doc.subject}</td>
+                <td>${doc.name}</td>
+                <td><a href="${doc.data}" target="_blank">Open</a></td>
+                <td>
+                    <button class="delete-btn"
+                            onclick="deleteDocument(${index})">
+                        Delete
+                    </button>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+    }
+
+    /* =======================
+       DELETE DOCUMENT
+    ======================== */
+    function deleteDocument(index) {
+        if (!confirm("Delete this document permanently?")) return;
+
+        const library = JSON.parse(localStorage.getItem("libraryDocs")) || [];
+        library.splice(index, 1);
+        localStorage.setItem("libraryDocs", JSON.stringify(library));
+        loadLibrary();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Co-Curricular Showcase</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", serif;
+            background: #f4f4f4;
+        }
+
+        header {
+            background: #006400;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Back Button */
+        .back-btn {
+            background: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #222;
+        }
+
+        /* Activities Grid */
+        .activities {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .activity-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        .activity-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .activity-card p {
+            text-align: justify;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Co-Curricular Showcase</h1>
+    <p>Celebrating our school’s activities</p>
+</header>
+
+<div class="container">
+
+    <!-- BACK BUTTON -->
+    <button class="back-btn" onclick="window.location.href='visitor.html'">
+        ← Back
+    </button>
+
+    <!-- ACTIVITIES DISPLAY -->
+    <div class="activities" id="activitiesContainer"></div>
+</div>
+
+<footer>
+    Character is built where talent meets opportunity.
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", loadActivities);
+
+    function loadActivities() {
+        const container = document.getElementById("activitiesContainer");
+        container.innerHTML = "";
+
+        const activities = JSON.parse(localStorage.getItem("coCurricular")) || [];
+
+        if (activities.length === 0) {
+            container.innerHTML = "<p class='no-data'>No activities added yet.</p>";
+            return;
+        }
+
+        activities.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "activity-card";
+
+            card.innerHTML = `
+                <img src="${item.photo}" alt="Activity Photo">
+                <p>${item.description}</p>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>

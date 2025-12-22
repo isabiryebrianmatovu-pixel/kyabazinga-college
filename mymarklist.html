@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Marklist</title>
+<style>
+body {
+    font-family: "Times New Roman", serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+h1 {
+    text-align: center;
+    color: #d40000;
+    flex: 1;
+}
+button {
+    padding: 8px 15px;
+    background: #d40000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:hover {
+    background: #a00000;
+}
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
+    width: 90%;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+th {
+    background-color: #d40000;
+    color: white;
+}
+tfoot td {
+    font-weight: bold;
+    background-color: #eee;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <button onclick="goBack()">Back</button>
+    <h1>My Marklist</h1>
+</header>
+
+<table id="marklistTable">
+    <thead>
+        <tr>
+            <th>Subject</th>
+            <th>Paper 1</th>
+            <th>Paper 2</th>
+            <th>Paper 3</th>
+            <th>Total Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Marks will appear here -->
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4">Overall Total Points</td>
+            <td id="overallTotal">0</td>
+        </tr>
+    </tfoot>
+</table>
+
+<script>
+// Get the logged-in student
+const loggedInStudent = JSON.parse(localStorage.getItem("loggedInStudent"));
+if(!loggedInStudent){
+    alert("Please log in first!");
+    window.location.href = "studentlogin.html";
+}
+
+// Load all students
+const students = JSON.parse(localStorage.getItem("students") || "[]");
+const student = students.find(s => s.number === loggedInStudent.number);
+
+const tbody = document.querySelector("#marklistTable tbody");
+const overallTotalCell = document.getElementById("overallTotal");
+
+// Helper functions
+function getGrade(mark){
+    if(mark === "-" || mark === null || mark === undefined || mark === "X") return "-";
+    mark = Number(mark);
+    if(mark >= 80) return "A";
+    if(mark >= 70) return "B";
+    if(mark >= 60) return "C";
+    if(mark >= 50) return "D";
+    return "F";
+}
+
+function gradePoints(mark){
+    if(mark === "-" || mark === null || mark === undefined || mark === "X") return 0;
+    mark = Number(mark);
+    if(mark >= 80) return 5;
+    if(mark >= 70) return 4;
+    if(mark >= 60) return 3;
+    if(mark >= 50) return 2;
+    return 1;
+}
+
+// Display marks for this student
+let overallTotal = 0;
+if(student && student.subjects && student.subjects.length > 0){
+    student.subjects.forEach(subject => {
+        const paperMarks = student.marks && student.marks[subject] ? student.marks[subject] : {paper1:"-", paper2:"-", paper3:"-"};
+        const p1Points = gradePoints(paperMarks.paper1);
+        const p2Points = gradePoints(paperMarks.paper2);
+        const p3Points = gradePoints(paperMarks.paper3);
+        const totalPoints = p1Points + p2Points + p3Points;
+        overallTotal += totalPoints;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${subject}</td>
+            <td>${paperMarks.paper1 || "-"}</td>
+            <td>${paperMarks.paper2 || "-"}</td>
+            <td>${paperMarks.paper3 || "-"}</td>
+            <td>${totalPoints}</td>
+        `;
+        tbody.appendChild(row);
+    });
+} else {
+    tbody.innerHTML = `<tr><td colspan="5">No marks available.</td></tr>`;
+}
+
+// Set overall total
+overallTotalCell.textContent = overallTotal;
+
+// Back button
+function goBack(){
+    window.location.href = "studentdashboard.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>School Digital Library</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- =======================
+         PAGE STYLING
+    ======================== -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", serif;
+            background: #f4f4f4;
+        }
+
+        header {
+            background: #2f4f4f;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* ===== Back Button ===== */
+        .back-btn {
+            background: #444;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #222;
+        }
+
+        /* ===== Selection Box ===== */
+        .filter-box {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 7px;
+            margin-top: 5px;
+        }
+
+        /* ===== Table ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #e6e6e6;
+        }
+
+        a {
+            color: #2f4f4f;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 15px;
+            color: #777;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>School Digital Library</h1>
+    <p>Select your class and subject to access materials</p>
+</header>
+
+<div class="container">
+
+    <!-- =======================
+         BACK BUTTON
+    ======================== -->
+    <button class="back-btn"
+            onclick="window.location.href='studentdashboard.html'">
+        ← Back
+    </button>
+
+    <!-- =======================
+         FILTER SECTION
+    ======================== -->
+    <div class="filter-box">
+        <h2>Choose Learning Area</h2>
+
+        <label for="classSelect">Select Class</label>
+        <select id="classSelect"></select>
+
+        <label for="subjectSelect">Select Subject</label>
+        <select id="subjectSelect"></select>
+    </div>
+
+    <!-- =======================
+         FILE DISPLAY
+    ======================== -->
+    <h2>Available Documents</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Document Name</th>
+                <th>Open / Download</th>
+            </tr>
+        </thead>
+        <tbody id="libraryTable">
+            <tr>
+                <td colspan="4" class="no-data">
+                    Please select a class and subject
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<footer>
+    Knowledge shared with order and purpose.
+</footer>
+
+<!-- =======================
+     JAVASCRIPT LOGIC
+======================== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        loadClasses();
+        loadSubjects();
+
+        document.getElementById("classSelect").addEventListener("change", filterLibrary);
+        document.getElementById("subjectSelect").addEventListener("change", filterLibrary);
+    });
+
+    /* =======================
+       LOAD CLASSES
+    ======================== */
+    function loadClasses() {
+        const classSelect = document.getElementById("classSelect");
+        classSelect.innerHTML = "<option value=''>-- Select Class --</option>";
+
+        const classes = JSON.parse(localStorage.getItem("classes")) || [];
+
+        classes.forEach(cls => {
+            const option = document.createElement("option");
+            option.value = cls;
+            option.textContent = cls;
+            classSelect.appendChild(option);
+        });
+    }
+
+    /* =======================
+       LOAD SUBJECTS
+    ======================== */
+    function loadSubjects() {
+        const subjectSelect = document.getElementById("subjectSelect");
+        subjectSelect.innerHTML = "<option value=''>-- Select Subject --</option>";
+
+        const subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+
+        subjects.forEach(sub => {
+            const option = document.createElement("option");
+            option.value = sub;
+            option.textContent = sub;
+            subjectSelect.appendChild(option);
+        });
+    }
+
+    /* =======================
+       FILTER LIBRARY
+    ======================== */
+    function filterLibrary() {
+        const cls = document.getElementById("classSelect").value;
+        const subject = document.getElementById("subjectSelect").value;
+        const table = document.getElementById("libraryTable");
+
+        table.innerHTML = "";
+
+        if (!cls || !subject) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4" class="no-data">
+                        Please select both class and subject
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        const library = JSON.parse(localStorage.getItem("libraryDocs")) || [];
+        const filtered = library.filter(
+            doc => doc.class === cls && doc.subject === subject
+        );
+
+        if (filtered.length === 0) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4" class="no-data">
+                        No documents found for ${cls} ${subject}
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        filtered.forEach(doc => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${doc.class}</td>
+                <td>${doc.subject}</td>
+                <td>${doc.name}</td>
+                <td>
+                    <a href="${doc.data}" target="_blank">Open</a>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+    }
+</script>
+
+</body>
+</html>

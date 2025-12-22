@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Login</title>
+<style>
+body { font-family:"Times New Roman", serif; background:#f4f4f4; margin:0; padding:0; }
+.container { width:90%; max-width:400px; margin:50px auto; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+input, button { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
+button { background:#d40000; color:white; border:none; cursor:pointer; font-weight:bold; }
+button:hover { background:#a00000; }
+.back-btn { background:#555; margin-bottom:10px; }
+.back-btn:hover { background:#333; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Back button -->
+    <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+
+    <h2>Teacher Login</h2>
+    <input type="password" id="teacherPassword" placeholder="Enter your password">
+    <button onclick="login()">Login</button>
+    <p id="loginError" style="color:red;display:none;">Invalid password!</p>
+</div>
+
+<script>
+let teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+
+function login(){
+    const password = document.getElementById("teacherPassword").value.trim();
+    const teacher = teachers.find(t => t.password === password);
+    if(!teacher){
+        document.getElementById("loginError").style.display = "block";
+        return;
+    }
+    localStorage.setItem("loggedInTeacher", JSON.stringify(teacher));
+    window.location.href = "teacher_select.html";
+}
+</script>
+
+</body>
+</html>

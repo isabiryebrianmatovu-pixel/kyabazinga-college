@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kyabazinga College – Fees Management</title>
+
+<style>
+/* ===== GENERAL PAGE STYLING ===== */
+body{
+    margin:0;
+    padding:0;
+    font-family:"Times New Roman", serif;
+    background:#ffffff;
+}
+
+/* ===== HEADER ===== */
+header{
+    background:#d40000;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+/* ===== BACK BUTTON ===== */
+.nav-btn{
+    display:inline-block;
+    margin:10px 0 20px 0;
+    padding:10px 20px;
+    background:#002366;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    border-radius:6px;
+}
+.nav-btn:hover{
+    background:#001a55;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container{
+    width:90%;
+    margin:auto;
+    padding:20px;
+}
+
+/* ===== SECTIONS ===== */
+.section{
+    background:white;
+    padding:20px;
+    margin-bottom:25px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.section h2{
+    color:#d40000;
+    margin-bottom:15px;
+}
+
+/* ===== INPUTS ===== */
+input, select{
+    width:100%;
+    padding:8px;
+    margin:5px 0 10px 0;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+
+/* ===== BUTTONS ===== */
+button{
+    padding:10px 15px;
+    background:#d40000;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    background:#a00000;
+}
+
+/* ===== LIST DISPLAY ===== */
+ul{
+    list-style:none;
+    padding:0;
+}
+
+li{
+    padding:8px;
+    background:#f5f5f5;
+    margin-bottom:5px;
+    border-radius:5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.remove-btn{
+    background:#555;
+    padding:5px 10px;
+    border-radius:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>School Fees & Requirements</h1>
+    <p>All fees are entered and displayed in Ugandan Shillings (UGX).</p>
+</header>
+
+<div class="container">
+
+<!-- ================= BACK BUTTON ================= -->
+<a href="administrator.html" class="nav-btn">BACK</a>
+
+<!-- ================= FEES SECTION ================= -->
+<div class="section">
+<h2>School Fees per Class (UGX)</h2>
+
+<select id="feeClass">
+    <option value="">Select Class</option>
+    <option>S1</option><option>S2</option><option>S3</option>
+    <option>S4</option><option>S5</option><option>S6</option>
+</select>
+
+<input type="number" id="dayFee" placeholder="Day School Fees (UGX)">
+<input type="number" id="boardingFee" placeholder="Boarding School Fees (UGX)">
+
+<button onclick="saveFees()">Save Fees</button>
+
+<ul id="feesList"></ul>
+</div>
+
+<!-- ================= GENERAL REQUIREMENTS ================= -->
+<div class="section">
+<h2>General School Requirements</h2>
+
+<input type="text" id="generalReqInput" placeholder="Enter requirement">
+<button onclick="addRequirement('general')">Add</button>
+
+<ul id="generalList"></ul>
+</div>
+
+<!-- ================= GIRLS REQUIREMENTS ================= -->
+<div class="section">
+<h2>Girls’ Requirements</h2>
+
+<input type="text" id="girlsReqInput" placeholder="Enter girls' requirement">
+<button onclick="addRequirement('girls')">Add</button>
+
+<ul id="girlsList"></ul>
+</div>
+
+<!-- ================= BOYS REQUIREMENTS ================= -->
+<div class="section">
+<h2>Boys’ Requirements</h2>
+
+<input type="text" id="boysReqInput" placeholder="Enter boys' requirement">
+<button onclick="addRequirement('boys')">Add</button>
+
+<ul id="boysList"></ul>
+</div>
+
+</div>
+
+<script>
+/* ===== FORMAT UGX ===== */
+function formatUGX(amount){
+    return "UGX " + Number(amount).toLocaleString("en-UG");
+}
+
+/* ======================================================
+   FEES MANAGEMENT
+====================================================== */
+function saveFees(){
+    const cls = document.getElementById("feeClass").value;
+    const day = document.getElementById("dayFee").value;
+    const boarding = document.getElementById("boardingFee").value;
+
+    if(!cls || !day || !boarding){
+        alert("Please fill all fee fields.");
+        return;
+    }
+
+    let fees = JSON.parse(localStorage.getItem("schoolFees")) || {};
+    fees[cls] = {day, boarding};
+
+    localStorage.setItem("schoolFees", JSON.stringify(fees));
+    loadFees();
+}
+
+function loadFees(){
+    const list = document.getElementById("feesList");
+    list.innerHTML = "";
+
+    let fees = JSON.parse(localStorage.getItem("schoolFees")) || {};
+
+    for(let cls in fees){
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <span>
+                <strong>${cls}</strong> – 
+                Day: ${formatUGX(fees[cls].day)} | 
+                Boarding: ${formatUGX(fees[cls].boarding)}
+            </span>
+            <button class="remove-btn" onclick="removeFees('${cls}')">Remove</button>
+        `;
+        list.appendChild(li);
+    }
+}
+
+function removeFees(cls){
+    let fees = JSON.parse(localStorage.getItem("schoolFees")) || {};
+    delete fees[cls];
+    localStorage.setItem("schoolFees", JSON.stringify(fees));
+    loadFees();
+}
+
+/* ======================================================
+   REQUIREMENTS MANAGEMENT
+====================================================== */
+function addRequirement(type){
+    const input = document.getElementById(type + "ReqInput");
+    const value = input.value.trim();
+    if(!value) return;
+
+    let data = JSON.parse(localStorage.getItem(type + "Requirements")) || [];
+    data.push(value);
+    localStorage.setItem(type + "Requirements", JSON.stringify(data));
+    input.value = "";
+    loadRequirements(type);
+}
+
+function loadRequirements(type){
+    const list = document.getElementById(type + "List");
+    list.innerHTML = "";
+
+    let data = JSON.parse(localStorage.getItem(type + "Requirements")) || [];
+
+    data.forEach((item, index)=>{
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <span>${item}</span>
+            <button class="remove-btn" onclick="removeRequirement('${type}',${index})">Remove</button>
+        `;
+        list.appendChild(li);
+    });
+}
+
+function removeRequirement(type,index){
+    let data = JSON.parse(localStorage.getItem(type + "Requirements")) || [];
+    data.splice(index,1);
+    localStorage.setItem(type + "Requirements", JSON.stringify(data));
+    loadRequirements(type);
+}
+
+/* ===== LOAD EVERYTHING ===== */
+loadFees();
+loadRequirements("general");
+loadRequirements("girls");
+loadRequirements("boys");
+</script>
+
+</body>
+</html>

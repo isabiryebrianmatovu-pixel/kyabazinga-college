@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Students Management</title>
+<style>
+/* ================= GENERAL STYLES ================= */
+body{margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header{background:#d40000;color:white;padding:30px 10px;text-align:center;}
+header img{width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+nav.button-nav{background:#a00000;padding:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+nav.button-nav a.nav-btn{background:white;color:#a00000;padding:10px 18px;text-decoration:none;font-weight:bold;font-size:17px;border-radius:6px;border:2px solid #a00000;transition:0.3s;}
+nav.button-nav a.nav-btn:hover{background:#a00000;color:white;}
+.container{width:90%;margin:auto;padding-top:20px;}
+.section{padding:25px;margin-bottom:25px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:white;}
+.section h2{color:#d40000;margin-bottom:15px;}
+input[type="text"], input[type="number"], input[type="file"], select{width:100%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
+.admin-btn{padding:10px 20px;margin-top:10px;background:#d40000;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+.admin-btn:hover{background:#a00000;}
+table{width:100%;border-collapse:collapse;}
+table th, table td{border:1px solid #ccc;padding:8px;text-align:left;}
+table th{background:#f2f2f2;color:#d40000;}
+img.student-photo{width:50px;height:50px;border-radius:4px;object-fit:cover;}
+button.action-btn{padding:5px 10px;margin-right:5px;background:#d40000;color:white;border:none;border-radius:4px;cursor:pointer;}
+button.action-btn:hover{background:#a00000;}
+footer{background:#002366;color:white;text-align:center;padding:20px;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+<img src="badge.png" alt="School Badge" id="adminBadge">
+<h1>KYABAZINGA COLLEGE</h1>
+<p><em>Students Management</em></p>
+</header>
+<!-- ================= END HEADER ================= -->
+
+<!-- ================= NAVIGATION ================= -->
+<nav class="button-nav">
+<a href="administrator.html" class="nav-btn">BACK</a>
+<a href="studentinformation.html" class="nav-btn">VIEW STUDENTS</a>
+<a href="marklist.html" class="nav-btn">MARKLIST</a>
+
+</nav>
+<!-- ================= END NAVIGATION ================= -->
+
+<!-- ================= MAIN CONTENT CONTAINER ================= -->
+<div class="container">
+
+    <!-- ---------- ADD STUDENT ---------- -->
+    <div class="section">
+        <h2>Add New Student</h2>
+        <input type="text" id="studentName" placeholder="Student Name (Required)">
+        <input type="number" id="studentNumber" placeholder="Student Number (Optional)">
+        <input type="number" id="studentAge" placeholder="Age (Optional)">
+        <input type="number" id="parentContact" placeholder="Parent/Guardian Contact (Optional)">
+        <input type="text" id="studentAddress" placeholder="Address (Optional)">
+        <input type="number" id="yearAdmission" placeholder="Year of Admission (Required)">
+        <input type="file" id="studentPhoto" accept="image/*">
+        <select id="studentClass">
+            <option value="">Select Class (Required)</option>
+        </select>
+        <select id="studentSubjects" multiple size="5"></select>
+        <button class="admin-btn" onclick="addStudent()">Add Student</button>
+    </div>
+    <!-- ---------- END ADD STUDENT ---------- -->
+
+    <!-- ---------- CURRENT STUDENTS ---------- -->
+    <div class="section">
+        <h2>Current Students</h2>
+        <table id="studentsTable">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Student No</th>
+                    <th>Age</th>
+                    <th>Parent Contact</th>
+                    <th>Address</th>
+                    <th>Year of Admission</th>
+                    <th>Subjects</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <!-- ---------- END CURRENT STUDENTS ---------- -->
+
+</div>
+<!-- ================= END MAIN CONTENT CONTAINER ================= -->
+
+<!-- ================= FOOTER ================= -->
+<footer>
+<p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+// ================= GENERAL SETUP =================
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("adminBadge").src = localStorage.getItem("schoolBadge") || "badge.png";
+
+// Load classes and subjects
+let classes = JSON.parse(localStorage.getItem("classes") || "[]");
+let subjects = JSON.parse(localStorage.getItem("subjects") || "[]");
+
+// Populate class select
+const classSelect = document.getElementById("studentClass");
+classes.forEach(cls=>{
+    const option = document.createElement("option");
+    option.value = cls;
+    option.textContent = cls;
+    classSelect.appendChild(option);
+});
+
+// Populate subjects multi-select
+const subjectsSelect = document.getElementById("studentSubjects");
+subjects.forEach(subj=>{
+    const option = document.createElement("option");
+    option.value = subj;
+    option.textContent = subj;
+    subjectsSelect.appendChild(option);
+});
+
+// Load students and history
+let students = JSON.parse(localStorage.getItem("students") || "[]");
+let studentsHistory = JSON.parse(localStorage.getItem("studentsHistory") || "[]");
+
+// ================= RENDER STUDENTS TABLE =================
+function renderStudents(){
+    const tbody = document.getElementById("studentsTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    students.forEach((student,index)=>{
+        const tr = document.createElement("tr");
+
+        const photoTd = document.createElement("td");
+        const img = document.createElement("img");
+        img.src = student.photo || "badge.png";
+        img.className = "student-photo";
+        photoTd.appendChild(img);
+
+        const nameTd = document.createElement("td"); nameTd.textContent = student.name;
+        const classTd = document.createElement("td"); classTd.textContent = student.class;
+        const numberTd = document.createElement("td"); numberTd.textContent = student.number || "-";
+        const ageTd = document.createElement("td"); ageTd.textContent = student.age || "-";
+        const contactTd = document.createElement("td"); contactTd.textContent = student.contact || "-";
+        const addressTd = document.createElement("td"); addressTd.textContent = student.address || "-";
+        const yearTd = document.createElement("td"); yearTd.textContent = student.yearAdmission || "-";
+        const subjectsTd = document.createElement("td"); subjectsTd.textContent = (student.subjects && student.subjects.length>0)? student.subjects.join(", "):"-";
+
+        const actionsTd = document.createElement("td");
+
+        // Delete button
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "action-btn";
+        delBtn.onclick = ()=> deleteStudent(index);
+        actionsTd.appendChild(delBtn);
+
+        // Graduate button
+        const gradBtn = document.createElement("button");
+        gradBtn.textContent = "Graduate";
+        gradBtn.className = "action-btn";
+        gradBtn.onclick = ()=>{
+            if(confirm(`Send ${student.name} to Students History?`)){
+                studentsHistory.push({
+                    name: student.name,
+                    class: student.class,
+                    number: student.number,
+                    age: student.age,
+                    contact: student.contact,
+                    address: student.address,
+                    subjects: student.subjects,
+                    photo: student.photo,
+                    yearAdmission: student.yearAdmission
+                });
+                localStorage.setItem("studentsHistory", JSON.stringify(studentsHistory));
+
+                students.splice(index,1);
+                localStorage.setItem("students", JSON.stringify(students));
+                renderStudents();
+                alert(`${student.name} has been moved to Students History.`);
+            }
+        };
+        actionsTd.appendChild(gradBtn);
+
+        tr.appendChild(photoTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(classTd);
+        tr.appendChild(numberTd);
+        tr.appendChild(ageTd);
+        tr.appendChild(contactTd);
+        tr.appendChild(addressTd);
+        tr.appendChild(yearTd);
+        tr.appendChild(subjectsTd);
+        tr.appendChild(actionsTd);
+
+        tbody.appendChild(tr);
+    });
+}
+
+// ================= ADD STUDENT =================
+function addStudent(){
+    const name = document.getElementById("studentName").value.trim();
+    const sclass = document.getElementById("studentClass").value;
+    const number = document.getElementById("studentNumber").value.trim();
+    const age = document.getElementById("studentAge").value.trim();
+    const contact = document.getElementById("parentContact").value.trim();
+    const address = document.getElementById("studentAddress").value.trim();
+    const yearAdmission = document.getElementById("yearAdmission").value.trim();
+    const selectedSubjects = Array.from(document.getElementById("studentSubjects").selectedOptions).map(o=>o.value);
+
+    if(!name || !sclass || !yearAdmission){
+        alert("Please fill in required fields: Name, Class, Year of Admission.");
+        return;
+    }
+
+    const photoInput = document.getElementById("studentPhoto");
+    if(photoInput.files[0]){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            students.push({name, class:sclass, number, age, contact, address, yearAdmission, subjects:selectedSubjects, photo:e.target.result});
+            localStorage.setItem("students", JSON.stringify(students));
+            renderStudents();
+            resetForm();
+        }
+        reader.readAsDataURL(photoInput.files[0]);
+    } else {
+        students.push({name, class:sclass, number, age, contact, address, yearAdmission, subjects:selectedSubjects, photo:""});
+        localStorage.setItem("students", JSON.stringify(students));
+        renderStudents();
+        resetForm();
+    }
+}
+
+// ================= DELETE STUDENT =================
+function deleteStudent(index){
+    if(confirm("Are you sure you want to delete this student?")){
+        students.splice(index,1);
+        localStorage.setItem("students", JSON.stringify(students));
+        renderStudents();
+    }
+}
+
+// ================= RESET FORM =================
+function resetForm(){
+    document.getElementById("studentName").value="";
+    document.getElementById("studentNumber").value="";
+    document.getElementById("studentAge").value="";
+    document.getElementById("parentContact").value="";
+    document.getElementById("studentAddress").value="";
+    document.getElementById("yearAdmission").value="";
+    document.getElementById("studentPhoto").value="";
+    document.getElementById("studentClass").value="";
+    Array.from(document.getElementById("studentSubjects").options).forEach(o=>o.selected=false);
+}
+
+// ================= AUTO-PROMOTION =================
+const promotionOrder = ["Senior One","Senior Two","Senior Three","Senior Four","Senior Five","Senior Six"];
+const today = new Date();
+let lastPromotionYear = parseInt(localStorage.getItem("lastPromotionYear")||0);
+if(today.getMonth() === 0 && today.getDate() === 1 && lastPromotionYear < today.getFullYear()){
+    promoteStudents(true);
+}
+
+function promoteStudents(auto=false){
+    students.forEach((student,index)=>{
+        let currentIndex = promotionOrder.indexOf(student.class);
+        if(currentIndex === promotionOrder.length -1){
+            // Move to history automatically
+            studentsHistory.push(student);
+            students[index].toDelete = true;
+        } else {
+            student.class = promotionOrder[currentIndex+1];
+        }
+    });
+    students = students.filter(s=>!s.toDelete);
+    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem("studentsHistory", JSON.stringify(studentsHistory));
+    localStorage.setItem("lastPromotionYear", today.getFullYear());
+    if(!auto) alert("Promotion completed!");
+    renderStudents();
+}
+
+// ================= INITIAL RENDER =================
+renderStudents();
+</script>
+
+</body>
+</html>

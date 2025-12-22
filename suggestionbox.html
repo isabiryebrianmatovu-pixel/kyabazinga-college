@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suggestion Box – Kyabazinga College</title>
+
+<style>
+body{
+    margin:0;
+    padding:0;
+    font-family:"Times New Roman", serif;
+    background:#f4f4f4;
+}
+header{
+    background:#d40000;
+    color:white;
+    text-align:center;
+    padding:25px 10px;
+}
+nav{
+    background:#a00000;
+    padding:10px;
+    text-align:center;
+}
+nav a{
+    background:white;
+    color:#a00000;
+    padding:8px 16px;
+    text-decoration:none;
+    font-weight:bold;
+    border-radius:6px;
+    border:2px solid #a00000;
+}
+nav a:hover{
+    background:#a00000;
+    color:white;
+}
+.container{
+    width:90%;
+    max-width:600px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+h2{
+    color:#d40000;
+    text-align:center;
+}
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:5px;
+    border:1px solid #ccc;
+    font-family:"Times New Roman", serif;
+}
+textarea{
+    height:150px;
+    resize:none;
+}
+button{
+    width:100%;
+    padding:12px;
+    background:#d40000;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:hover{
+    background:#a00000;
+}
+.success{
+    color:green;
+    text-align:center;
+    font-weight:bold;
+    display:none;
+}
+footer{
+    background:#002366;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>KYABAZINGA COLLEGE</h1>
+<p><em>Suggestion Box</em></p>
+</header>
+
+<nav>
+<a href="visitor.html">BACK</a>
+</nav>
+
+<div class="container">
+<h2>Write Your Suggestion</h2>
+
+<!-- Name optional -->
+<input type="text" id="name" placeholder="Your Name (optional)">
+
+<textarea id="suggestion" placeholder="Write your suggestion here..." required></textarea>
+
+<button onclick="sendSuggestion()">Send Suggestion</button>
+
+<p class="success" id="successMsg">Thank you! Your suggestion has been sent.</p>
+</div>
+
+<footer>
+<p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+// Set current year
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// AUTO LOAD STUDENT NAME IF LOGGED IN
+const storedName = localStorage.getItem("loggedInStudentName");
+if(storedName){
+    document.getElementById("name").value = storedName;
+}
+
+function sendSuggestion(){
+    let name = document.getElementById("name").value.trim();
+    const message = document.getElementById("suggestion").value.trim();
+
+    if(message === ""){
+        alert("Please write a suggestion.");
+        return;
+    }
+
+    // Default to "Anonymous" if no name entered
+    if(name === "") name = "Anonymous";
+
+    // Get existing suggestions
+    let suggestions = JSON.parse(localStorage.getItem("suggestions") || "[]");
+
+    // Add new suggestion
+    suggestions.push({
+        name: name,
+        message: message,
+        date: new Date().toLocaleString()
+    });
+
+    // Save back to localStorage
+    localStorage.setItem("suggestions", JSON.stringify(suggestions));
+
+    // Show success message
+    document.getElementById("successMsg").style.display = "block";
+
+    // Clear textarea (but keep name if typed)
+    document.getElementById("suggestion").value = "";
+}
+</script>
+
+</body>
+</html>
