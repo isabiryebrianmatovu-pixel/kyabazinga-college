@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kyabazinga College – Administrator</title>
+
+<style>
+body {margin:0;padding:0;font-family:"Times New Roman", serif;background:white;}
+header {background:#d40000;color:white;padding:30px 10px;text-align:center;}
+header img {width:150px;max-width:180px;height:auto;margin-bottom:10px;}
+
+nav.button-nav {
+    background:#a00000;
+    padding:12px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+}
+
+nav.button-nav a.nav-btn {
+    display:inline-block;
+    background:white;
+    color:#a00000;
+    padding:10px 18px;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:17px;
+    border-radius:6px;
+    border:2px solid #a00000;
+    transition:0.3s;
+}
+
+nav.button-nav a.nav-btn:hover {
+    background:#a00000;
+    color:white;
+}
+
+.container {width:90%;margin:auto;padding-top:20px;}
+
+footer {
+    background:#002366;
+    color:white;
+    padding:20px;
+    text-align:center;
+    margin-top:20px;
+}
+
+/* PASSWORD SCREEN */
+#passwordScreen{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:#f4f4f4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+#passwordBox{
+    background:white;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.2);
+    text-align:center;
+    width:300px;
+}
+
+#passwordBox input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
+
+#passwordBox button{
+    background:#d40000;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    cursor:pointer;
+    border-radius:5px;
+    font-weight:bold;
+}
+
+#errorMsg{
+    color:red;
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PASSWORD PROTECTION -->
+<div id="passwordScreen">
+    <div id="passwordBox">
+        <h2 style="color:#d40000;">Administrator Access</h2>
+        <input type="password" id="adminPassword" placeholder="Enter password">
+        <button onclick="checkPassword()">Login</button>
+        <p id="errorMsg">Wrong password</p>
+    </div>
+</div>
+
+<header>
+    <img src="badge.png" alt="School Badge" id="adminBadge">
+    <h1>KYABAZINGA COLLEGE</h1>
+    <p><em>Administrator Dashboard</em></p>
+</header>
+
+<nav class="button-nav">
+    <a href="index.html" class="nav-btn">HOME</a>
+    <a href="studentsmanagement.html" class="nav-btn">STUDENTS</a>
+    <a href="teachersmanagement.html" class="nav-btn">TEACHERS</a>
+    <a href="subjectmanagement.html" class="nav-btn">SUBJECTS</a>
+    <a href="visitormanagement.html" class="nav-btn">VISITORS</a>
+    <a href="hometext.html" class="nav-btn">HOME TEXTS</a>
+    <a href="homephotos.html" class="nav-btn">HOME PHOTOS</a>
+    <a href="fees.html" class="nav-btn">FEES</a>
+    <a href="viewsuggestions.html" class="nav-btn">SUGGESTIONS</a>
+</nav>
+
+<div class="container">
+    <h2>
+        YOU BEING AT THIS PAGE YOU ARE AN ADMINISTRATOR  
+        <br>
+        If you are not, please note it is illegal.
+    </h2>
+</div>
+
+<footer>
+    <p>© <span id="year"></span> Kyabazinga College — We Are Just Educated and Cultured</p>
+</footer>
+
+<script>
+/* PASSWORD CHECK */
+const ADMIN_PASSWORD = "sorry";
+
+function checkPassword(){
+    const input = document.getElementById("adminPassword").value;
+    const error = document.getElementById("errorMsg");
+
+    if(input === ADMIN_PASSWORD){
+        document.getElementById("passwordScreen").style.display = "none";
+    } else {
+        error.style.display = "block";
+    }
+}
+
+/* FOOTER YEAR & BADGE */
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("adminBadge").src =
+localStorage.getItem("schoolBadge") || "badge.png";
+</script>
+
+</body>
+</html>
